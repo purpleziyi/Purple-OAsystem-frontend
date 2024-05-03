@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
     function clearUserToken() {
         _user.value = {}
         _token.value = ""
+
         localStorage.removeItem(USER_KEY)
         localStorage.removeItem(TOKEN_KEY)
     }
@@ -51,7 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
     })
 
     let is_logined = computed(() => {
-        if (Object.keys(user.value).length > 0 && token.value) {
+        if (Object.keys(user.value).length > 0 && token.value) {  // user值不为空且有token值就说明已经登录过
             return true;
         }
         return false;

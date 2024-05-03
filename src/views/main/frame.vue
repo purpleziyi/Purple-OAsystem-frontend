@@ -4,6 +4,13 @@ import {
     Expand,
     Fold
 } from '@element-plus/icons-vue'
+import { useAuthStore } from "@/stores/auth";    // user-info is stored in auth.js
+import { useRouter } from "vue-router";
+
+
+const authStore = useAuthStore()
+const router = useRouter()
+
 
 let isCollapse = ref(false)
 
@@ -18,6 +25,11 @@ let asideWidth = computed(() => {
 
 const onCollapseAside = () =>{
     isCollapse.value = !isCollapse.value
+}
+
+const onExit = () => {
+    authStore.clearUserToken();       // 清除token
+    router.push({ name: 'login' })     // 跳转到login界面
 }
  
 </script>
@@ -127,13 +139,17 @@ const onCollapseAside = () =>{
                 <el-dropdown> 
                     <span class="el-dropdown-link"> 
                         <el-avatar :size="30" icon="UserFilled" />
-                        <span style="margin-left: 10px;">PurpleZiyi</span>
+                        <span style="margin-left: 10px;">
+                            <el-typography :style="{ fontFamily: 'Arial', fontSize: '15px'}">
+                                [{{ authStore.user.department.name }}]{{authStore.user.username }}          <!-- 用户名展示区 -->
+                            </el-typography>
+                        </span> 
                         <el-icon class="el-icon--right"><arrow-down /></el-icon>
                     </span>
                     <template #dropdown>
                         <el-dropdown-menu>
                         <el-dropdown-item>Change Password</el-dropdown-item>
-                        <el-dropdown-item>Logout</el-dropdown-item>
+                        <el-dropdown-item divided @click="onExit">Logout</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
