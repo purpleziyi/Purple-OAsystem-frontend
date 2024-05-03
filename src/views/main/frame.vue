@@ -207,7 +207,10 @@ const onSubmit = () => {
                     </template>
                 </el-dropdown>
             </el-header>
-            <el-main class="main">Main</el-main>
+            <el-main class="main">
+                <RouterView>
+                </RouterView>
+            </el-main>
         </el-container>
     </el-container>
 
