@@ -124,17 +124,16 @@ const onCollapseAside = () =>{
                     <el-button v-show="isCollapse" :icon="Expand" @click="onCollapseAside" />
                     <el-button v-show="!isCollapse" :icon="Fold" @click="onCollapseAside" />
                 </div>
-                <el-dropdown>
-                    <el-button type="primary">
-                        Dropdown List<el-icon class="el-icon--right"><arrow-down /></el-icon>
-                    </el-button>
+                <el-dropdown> 
+                    <span class="el-dropdown-link"> 
+                        <el-avatar :size="30" icon="UserFilled" />
+                        <span style="margin-left: 10px;">PurpleZiyi</span>
+                        <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                    </span>
                     <template #dropdown>
                         <el-dropdown-menu>
-                        <el-dropdown-item>Action 1</el-dropdown-item>
-                        <el-dropdown-item>Action 2</el-dropdown-item>
-                        <el-dropdown-item>Action 3</el-dropdown-item>
-                        <el-dropdown-item>Action 4</el-dropdown-item>
-                        <el-dropdown-item>Action 5</el-dropdown-item>
+                        <el-dropdown-item>Change Password</el-dropdown-item>
+                        <el-dropdown-item>Logout</el-dropdown-item>
                         </el-dropdown-menu>
                     </template>
                 </el-dropdown>
@@ -178,6 +177,10 @@ const onCollapseAside = () =>{
     align-items: center;
 }
  
+.el-dropdown-link {
+    display: flex;
+    align-items: center;
+}
 
 .el-menu {
     border-right: none;
