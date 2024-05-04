@@ -3,7 +3,7 @@ import OAPageHeader from "@/components/OAPageHeader.vue"
 import absentHttp from "@/api/absentHttp";
 import { ref, reactive, onMounted, computed, watch } from "vue"
 import { ElMessage } from "element-plus"
-// import timeFormatter from "@/utils/timeFormatter";
+import timeFormatter from "@/utils/timeFormatter";
 // import OAMain from "@/components/OAMain.vue"
 // import OAPagination from "@/components/OAPagination.vue"
 // import OADialog from "@/components/OADialog.vue"
@@ -11,6 +11,7 @@ import { ElMessage } from "element-plus"
 
 let formLabelWidth = "100px"
 let dialogFormVisible = ref(false)
+
 let absentForm = reactive({
     title: '',
     absent_type_id: null,
@@ -36,7 +37,7 @@ let responder_str = computed(() => {
     }
 })
 
-let absentFormRef = ref()
+
 let rules = reactive({
     title: [
         { required: true, message: 'Please enter a title!', trigger: 'blur' }  // 失焦时触发
@@ -62,8 +63,31 @@ const onShowDialog = () => {
     dialogFormVisible.value = true;
 }
 
+let absentFormRef = ref()  //获取表单对象
+
 const onSubmitAbsent = () => {
-    console.log(absentForm)
+    absentFormRef.value.validate(async (valid, fields) => {
+        if (valid) {    // 如果验证成功，则后端需要的一些数据需要体现出来
+            let data = {
+                title: absentForm.title,
+                absent_type_id: absentForm.absent_type_id,
+                start_date: absentForm.date_range[0],
+                end_date: absentForm.date_range[1],
+                request_content: absentForm.request_content
+            }
+            // console.log(data);
+            try {
+                let absent = await absentHttp.applyAbsent(data)  // 调用申请请假的API
+                dialogFormVisible.value = false;   // 成功后隐藏对话框(细节)
+                // console.log(absent);
+                absents.value.unshift(absent)
+                // 发起考勤成功后，做一个提示
+                ElMessage.success('Leave application successfully sent!');
+            } catch (detail) {
+                ElMessage.error(detail)
+            }
+        }
+    })
 }
 
 // 从API获取数据 引入absentHttp
@@ -78,7 +102,11 @@ onMounted(async () => {
         Object.assign(responder, responder_data)
 
         // 3. 获取个人考勤列表
-        requestAbsents(1)
+        // requestAbsents(1)
+        let absents_data = await absentHttp.getMyAbsents()
+        let total = absents_data.count;
+        let results = absents_data.results;
+        absents.value = results;
     } catch (detail) {
         ElMessage.error(detail)
     }
@@ -94,6 +122,35 @@ onMounted(async () => {
                     <Plus />
                 </el-icon> Request for Leave</el-button> <!--发起考勤-->
         </el-card>
+
+        <el-card>
+            <el-table :data="absents"><!--absents是数组-->
+                <el-table-column prop="title" label="Title" /> <!--标题-->
+                <el-table-column prop="absent_type.name" label="Type" /><!--类型-->
+                <el-table-column prop="request_content" label="Reason" /><!--原因-->
+                <el-table-column label="Create Time"><!--发起时间-->
+                    <template #default="scope">
+                        {{ timeFormatter.stringFromDateTime(scope.row.create_time) }}
+                    </template>
+                </el-table-column>
+                <el-table-column prop="start_date" label="Start Date" />
+                <el-table-column prop="end_date" label="End Date" />
+                <el-table-column label="Approver"> <!--审核领导  利用slot-->
+                    {{ responder_str }}
+                </el-table-column>
+                <el-table-column prop="response_content" label="Feedback" /><!--反馈意见-->
+                <el-table-column label="Status"><!--审核状态  利用slot和if判断，自定义scope来获取每个slot的数据-->
+                    <template #default="scope">
+                        <el-tag type="info" v-if="scope.row.status == 1">Reviewing</el-tag>
+                        <el-tag type="success" v-else-if="scope.row.status == 2">Approved</el-tag>
+                        <el-tag type="danger" v-else>Rejected</el-tag>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- <template #footer>
+                <OAPagination v-model="pagination.page" :total="pagination.total"></OAPagination>
+            </template> -->
+        </el-card>
     </el-space>
 
     <el-dialog v-model="dialogFormVisible" title="Request for Leave" width="500"> <!--发起请假-->
@@ -101,7 +158,8 @@ onMounted(async () => {
             <el-form-item label="Title" :label-width="formLabelWidth" prop="title">
                 <el-input v-model="absentForm.title" autocomplete="off" />
             </el-form-item>
-            <el-form-item label="Absent Type" :label-width="formLabelWidth" prop="absent_type_id"> <!--请假类型-->
+            <el-form-item label="Absent Type" :label-width="formLabelWidth" prop="absent_type_id">
+                <!--请假类型-->
                 <el-select v-model="absentForm.absent_type_id" placeholder="Please select absent type">
                     <el-option v-for="item in absent_types" :label="item.name" :value="item.id" :key="item.name" />
                 </el-select>
