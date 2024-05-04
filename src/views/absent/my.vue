@@ -4,9 +4,9 @@ import absentHttp from "@/api/absentHttp";
 import { ref, reactive, onMounted, computed, watch } from "vue"
 import { ElMessage } from "element-plus"
 import timeFormatter from "@/utils/timeFormatter";
-// import OAMain from "@/components/OAMain.vue"
-// import OAPagination from "@/components/OAPagination.vue"
-// import OADialog from "@/components/OADialog.vue"
+import OAMain from "@/components/OAMain.vue"
+import OAPagination from "@/components/OAPagination.vue"
+import OADialog from "@/components/OADialog.vue"
 
 
 let formLabelWidth = "100px"
@@ -137,8 +137,7 @@ watch(() => pagination.page, (value) => {
 </script>
 
 <template>
-    <el-space direction="vertical" fill :size="20" style="width: 100%">
-        <OAPageHeader content="Personal attendance"></OAPageHeader>
+    <OAMain title="Personal attendance"> <!--个人考勤-->
         <el-card style="text-align: right;">
             <el-button type="primary" @click="onShowDialog"><el-icon>
                     <Plus />
@@ -170,13 +169,12 @@ watch(() => pagination.page, (value) => {
                 </el-table-column>
             </el-table>
             <template #footer>
-                <el-pagination layout="prev, pager, next" :total="pagination.total" :page-size="1"
-                    v-model:curreny-page="pagination.page"></el-pagination>
+                <OAPagination v-model="pagination.page" :total="pagination.total"></OAPagination>
             </template>
         </el-card>
-    </el-space>
+    </OAMain>
 
-    <el-dialog v-model="dialogFormVisible" title="Request for Leave" width="500"> <!--发起请假-->
+    <OADialog title="Request for Leave" v-model="dialogFormVisible" @submit="onSubmitAbsent"> <!--发起请假-->
         <el-form :model="absentForm" :rules="rules" ref="absentFormRef">
             <el-form-item label="Title" :label-width="formLabelWidth" prop="title">
                 <el-input v-model="absentForm.title" autocomplete="off" />
@@ -188,9 +186,10 @@ watch(() => pagination.page, (value) => {
                 </el-select>
             </el-form-item>
 
-            <el-form-item label="Leave Time" :label-width="formLabelWidth"> <!--请假时间-->
-                <el-date-picker v-model="absentForm.date_ranges" type="daterange" range-separator="To"
-                    start-placeholder="Start date" end-placeholder="End date" :size="size" />
+            <el-form-item label="Leave Time" :label-width="formLabelWidth" prop="date_range"> <!--请假时间-->
+                <el-date-picker v-model="absentForm.date_range" type="daterange" range-separator="To"
+                    start-placeholder="Start date" end-placeholder="End date" format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD" />
             </el-form-item>
 
             <el-form-item label="Approver" :label-width="formLabelWidth"><!--审批人 只读 计算属性"responder_str"-->
@@ -201,24 +200,8 @@ watch(() => pagination.page, (value) => {
                 <el-input type="textarea" v-model="absentForm.request_content" autocomplete="off" />
             </el-form-item>
         </el-form>
-        <template #footer>
-            <div class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">Cancel</el-button>
-                <el-button type="primary" @click="onSubmitAbsent">
-                    Confirm
-                </el-button>
-            </div>
-        </template>
-    </el-dialog>
+    </OADialog>
+
 </template>
 
-<style scoped>
-.el-pagination {
-    justify-content: center;
-    /*修改主线上的对齐方式*/
-}
-
-.el-space :deep(.el-space__item) {
-    width: 100%;
-}
-</style>
+<style scoped></style>
