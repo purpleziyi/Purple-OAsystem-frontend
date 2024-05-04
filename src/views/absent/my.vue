@@ -90,6 +90,19 @@ const onSubmitAbsent = () => {
     })
 }
 
+// 用于onMounted中获取个人考勤列表 和 监听pagination
+const requestAbsents = async (page) => {
+    try {
+        let absents_data = await absentHttp.getMyAbsents(page)
+        let total = absents_data.count;
+        pagination.total = total
+        let results = absents_data.results;
+        absents.value = results;
+    } catch (detail) {
+        ElMessage.error(detail);
+    }
+}
+
 // 从API获取数据 引入absentHttp
 onMounted(async () => {
     try {
@@ -102,15 +115,24 @@ onMounted(async () => {
         Object.assign(responder, responder_data)
 
         // 3. 获取个人考勤列表
-        // requestAbsents(1)
-        let absents_data = await absentHttp.getMyAbsents()
-        let total = absents_data.count;
-        let results = absents_data.results;
-        absents.value = results;
+        requestAbsents(1)
     } catch (detail) {
         ElMessage.error(detail)
     }
 })
+
+let pagination = reactive({
+    total: 0,
+    page: 1
+})
+
+
+// 监听属性 导入watch函数
+watch(() => pagination.page, (value) => {
+    requestAbsents(value);
+})
+
+
 
 </script>
 
@@ -147,9 +169,10 @@ onMounted(async () => {
                     </template>
                 </el-table-column>
             </el-table>
-            <!-- <template #footer>
-                <OAPagination v-model="pagination.page" :total="pagination.total"></OAPagination>
-            </template> -->
+            <template #footer>
+                <el-pagination layout="prev, pager, next" :total="pagination.total" :page-size="1"
+                    v-model:curreny-page="pagination.page"></el-pagination>
+            </template>
         </el-card>
     </el-space>
 
@@ -189,4 +212,13 @@ onMounted(async () => {
     </el-dialog>
 </template>
 
-<style scoped></style>
+<style scoped>
+.el-pagination {
+    justify-content: center;
+    /*修改主线上的对齐方式*/
+}
+
+.el-space :deep(.el-space__item) {
+    width: 100%;
+}
+</style>
