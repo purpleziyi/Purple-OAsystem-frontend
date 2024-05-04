@@ -80,7 +80,7 @@ const onSubmitAbsent = () => {
                 let absent = await absentHttp.applyAbsent(data)  // 调用申请请假的API
                 dialogFormVisible.value = false;   // 成功后隐藏对话框(细节)
                 // console.log(absent);
-                absents.value.unshift(absent)
+                absents.value.unshift(absent)  // 把某个元素添加到数组中的起始位置
                 // 发起考勤成功后，做一个提示
                 ElMessage.success('Leave application successfully sent!');
             } catch (detail) {

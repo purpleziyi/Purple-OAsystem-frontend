@@ -8,6 +8,7 @@ class Http {
             timeout: 6000
         });
 
+        // 使用了 Axios 的请求拦截器，在发送请求前会检查当前用户的身份，如果存在 token，则在请求头中添加 JWT 认证
         this.instance.interceptors.request.use((config) => {
             const authStore = useAuthStore()
             const token = authStore.token
