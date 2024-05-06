@@ -1,8 +1,15 @@
 <script setup name="publishinform">
 import OAMain from '@/components/OAMain.vue';
-import { ref, reactive, onBeforeUnmount, shallowRef, onMounted } from "vue"
+import { ref, reactive, onMounted, onBeforeUnmount, shallowRef, defineComponent, toRaw } from "vue"
+
+// WangEditor
 import '@wangeditor/editor/dist/css/style.css' // import css
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+
+//Quill 自己尝试
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css';
+
 
 // define Form proporties
 let informForm = reactive({
@@ -79,13 +86,18 @@ const onSubmit = () => {
                 </el-select>
             </el-form-item>
 
-            <el-form-item label="Content" :label-width="formLabelWidth" prop="content"> <!--内容-->
+            <el-form-item label="Content" :label-width="formLabelWidth" prop="content"> <!--内容 富文本框区-->
                 <div style="border: 1px solid #ccc">
+                    <QuillEditor ref="myQuillEditor" theme="snow" toolbar="full" v-model:content="informForm.content"
+                        class="ql-editor" style="height: 400px" />
+                </div>
+
+                <!-- <div style="border: 1px solid #ccc">
                     <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig"
                         :mode="mode" />
                     <Editor style="height: 500px; overflow-y: hidden;" v-model="informForm.content"
                         :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" />
-                </div>
+                </div> -->
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onSubmit">Submit</el-button>
@@ -97,4 +109,9 @@ const onSubmit = () => {
 
 
 
-<style scoped></style>
+<style scoped>
+/* .ql-editor {
+    height: 300px;
+    width: 100px
+} */
+</style>
