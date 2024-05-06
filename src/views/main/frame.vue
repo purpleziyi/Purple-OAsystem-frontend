@@ -142,13 +142,13 @@ const onSubmit = () => {
                             </el-typography>
                         </span>
                     </template>
-                    <el-menu-item index="3-1">
+                    <el-menu-item index="3-1" :route="{ name: 'inform_publish' }"> <!-- 发布通知 -->
                         <el-icon>
                             <CirclePlusFilled />
                         </el-icon>
                         <span>Post a Notice</span> <!-- 发布通知 -->
                     </el-menu-item>
-                    <el-menu-item index="3-2">
+                    <el-menu-item index="3-2" :route="{ name: 'inform_list' }"><!-- 通知列表 -->
                         <el-icon>
                             <List />
                         </el-icon>
