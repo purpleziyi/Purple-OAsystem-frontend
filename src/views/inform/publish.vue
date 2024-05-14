@@ -1,14 +1,22 @@
 <script setup name="publishinform">
 import OAMain from '@/components/OAMain.vue';
 import { ref, reactive, onMounted, onBeforeUnmount, shallowRef, defineComponent, toRaw } from "vue"
+import staffHttp from '@/api/staffHttp';
+import { ElMessage } from "element-plus"
 
 // WangEditor
 import '@wangeditor/editor/dist/css/style.css' // import css
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
+import { i18nChangeLanguage } from '@wangeditor/editor'
+
+
+
+
 
 //Quill 自己尝试
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
+
 
 
 // define Form proporties
@@ -38,24 +46,30 @@ let departments = ref([]) // get data from server
 
 /*** 与WangEditor相关的配置  ***/
 // editor instance, use `shallowRef`
+i18nChangeLanguage('en')  // 切换语言 - 'en' 或者 'zh-CN'
 const editorRef = shallowRef()
-
 const toolbarConfig = {}
 const editorConfig = { placeholder: 'Type here...' }
 let mode = "default"
-
-
 // Timely destroy `editor` before vue component destroy.
 onBeforeUnmount(() => {
     const editor = editorRef.value
     if (editor == null) return
     editor.destroy()
 })
-
 const handleCreated = (editor) => {
     editorRef.value = editor // record editor instance
 }
 /***  与WangEditor相关的配置  ***/
+
+onMounted(async () => {
+    try {
+        let data = await staffHttp.getAllDepartment()
+        departments.value = data.results
+    } catch (detail) {
+        ElMessage.error(detail)
+    }
+})
 
 const onSubmit = () => {
     formRef.value.validate((valid, fields) => {
@@ -87,17 +101,17 @@ const onSubmit = () => {
                 </el-form-item>
 
                 <el-form-item label="Content" :label-width="formLabelWidth" prop="content"> <!--内容 富文本框区-->
-                    <div style="border: 1px solid #ccc">
+                    <!--<div style="border: 1px solid #ccc">
                         <QuillEditor ref="myQuillEditor" theme="snow" toolbar="full"
                             v-model:content="informForm.content" class="ql-editor" style="height: 400px" />
-                    </div>
+                    </div>-->
 
-                    <!-- <div style="border: 1px solid #ccc">
-                        <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef" :defaultConfig="toolbarConfig"
-                            :mode="mode" />
+                    <div style="border: 1px solid #ccc">
+                        <Toolbar style="border-bottom: 1px solid #ccc" :editor="editorRef"
+                            :defaultConfig="toolbarConfig" :mode="mode" />
                         <Editor style="height: 500px; overflow-y: hidden;" v-model="informForm.content"
                             :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" />
-                    </div> -->
+                    </div>
                 </el-form-item>
                 <el-form-item>
                     <div style="text-align: right; flex:1;"><!--提交按钮 置于右下方-->
