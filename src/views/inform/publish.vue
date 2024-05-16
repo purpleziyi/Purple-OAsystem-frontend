@@ -3,6 +3,9 @@ import OAMain from '@/components/OAMain.vue';
 import { ref, reactive, onMounted, onBeforeUnmount, shallowRef, defineComponent, toRaw } from "vue"
 import staffHttp from '@/api/staffHttp';
 import { ElMessage } from "element-plus"
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore()
 
 // WangEditor
 import '@wangeditor/editor/dist/css/style.css' // import css
@@ -49,7 +52,52 @@ let departments = ref([]) // get data from server
 i18nChangeLanguage('en')  // 切换语言 - 'en' 或者 'zh-CN'
 const editorRef = shallowRef()
 const toolbarConfig = {}
-const editorConfig = { placeholder: 'Type here...' }
+const editorConfig = {
+    placeholder: 'Type here...',
+    MENU_CONF: {
+        uploadImage: {
+            // http://localhost:5173/image/upload
+            // http://localhost:8000/image/upload
+            // 在env.development文件中已经定义过开发环境中的 VITE_BASE_URL，以后打包时只用修改env.production文件下的URL即可
+            server: import.meta.env.VITE_BASE_URL + '/image/upload',
+            fieldName: 'image',   // 上传给server后用何种字段接收，此处需要与后端代码UploadImageSerializer中的“image”保持一致
+            maxFileSize: 0.5 * 1024 * 1024,  // 此处需要与后端UploadImageSerializer中的validate_image函数下的max_size保持一致
+            maxNumberOfFiles: 10,    // 最多可以上传10个文件，默认是100
+            allowedFileTypes: ['image/*'],
+            headers: {
+                Authorization: "JWT " + authStore.token   //  必须设置，否则会得到403
+            },
+            timeout: 6 * 1000, //  超时时间为 6 秒,
+            customInsert(res, insertFn) {
+                if (res.errno == 0) {
+                    // res 即服务端的返回结果
+                    let data = res.data;
+                    let url = import.meta.env.VITE_BASE_URL + data.url   // 服务器的域名
+                    let href = import.meta.env.VITE_BASE_URL + data.href
+                    let alt = data.alt;
+                    // 从 res 中找到 url alt href ，然后插入图片
+                    insertFn(url, alt, href)
+                } else {
+                    ElMessage.error(res.message)
+                }
+            },
+            // 单个文件上传失败
+            onFailed(file, res) {
+                console.log(`${file.name} upload failed`, res)
+            },
+
+            // 上传错误，或者触发 timeout 超时
+            onError(file, err, res) {
+                if (file.size > 0.5 * 1024 * 1024) {
+                    ElMessage.error('The maximum image size cannot exceed 0.5MB!')
+                } else {
+                    ElMessage.error('Upload a valid image!')
+                }
+            },
+        }
+    }
+}
+
 let mode = "default"
 // Timely destroy `editor` before vue component destroy.
 onBeforeUnmount(() => {
