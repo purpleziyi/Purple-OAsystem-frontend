@@ -10,7 +10,13 @@ const getInformList = (page = 1) => {
     return http.get(path)
 }
 
+const deleteInform = (pk) => {
+    const path = "/inform/inform/" + pk
+    return http.delete(path)
+}
+
 export default {
     publishInform,
-    getInformList
+    getInformList,
+    deleteInform
 }
