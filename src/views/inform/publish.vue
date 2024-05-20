@@ -4,6 +4,7 @@ import { ref, reactive, onMounted, onBeforeUnmount, shallowRef, defineComponent,
 import staffHttp from '@/api/staffHttp';
 import { ElMessage } from "element-plus"
 import { useAuthStore } from '@/stores/auth';
+import informHttp from '@/api/informHttp';
 
 const authStore = useAuthStore()
 
@@ -11,8 +12,6 @@ const authStore = useAuthStore()
 import '@wangeditor/editor/dist/css/style.css' // import css
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import { i18nChangeLanguage } from '@wangeditor/editor'
-
-
 
 
 
@@ -120,14 +119,20 @@ onMounted(async () => {
 })
 
 const onSubmit = () => {
-    formRef.value.validate((valid, fields) => {
+    formRef.value.validate(async (valid, fields) => {
         if (valid) {
             console.log(informForm);
+            try {
+                let data = await informHttp.publishInform(informForm)
+                console.log(data);
+            } catch (detail) {
+                ElMessage.error(detail)
+            }
         }
-    }
-
-    )
+    })
 }
+
+
 
 </script>
 
