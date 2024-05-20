@@ -5,6 +5,12 @@ const publishInform = (data) => {
     return http.post(path, data)
 }
 
+const getInformList = (page = 1) => {
+    const path = "/inform/inform?page=" + page
+    return http.get(path)
+}
+
 export default {
-    publishInform
+    publishInform,
+    getInformList
 }
