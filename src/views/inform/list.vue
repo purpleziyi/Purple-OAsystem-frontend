@@ -62,9 +62,13 @@ const onDeleteInform = async () => {
                 <el-table-column label="Title"> <!--标题-->
                     <template #default="scope">
 
-                        <RouterLink :to="{ name: 'inform_detail', params: { pk: scope.row.id } }">{{ scope.row.title
-                            }}</RouterLink>
-
+                        <!--Unread notifications have a little red dot -->
+                        <el-badge v-if="scope.row.reads.length == 0" is-dot class="item">
+                            <RouterLink :to="{ name: 'inform_detail', params: { pk: scope.row.id } }">{{ scope.row.title
+                                }}</RouterLink>
+                        </el-badge>
+                        <RouterLink v-else :to="{ name: 'inform_detail', params: { pk: scope.row.id } }">{{
+                            scope.row.title }}</RouterLink> <!--如果通知已读则正常显示链接-->
                     </template>
                 </el-table-column>
                 <el-table-column label="Publisher"><!--发布者 -->
