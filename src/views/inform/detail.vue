@@ -33,7 +33,7 @@ onMounted(async () => {
         ElMessage.error(detail)
     }
 
-    // 发送阅读请求
+    // 发送阅读请求  如果发生异常也只限于浏览器的控制台，用户的界面是看不到，所以不放在try中也可以
     await informHttp.readInform(pk)
 })
 
