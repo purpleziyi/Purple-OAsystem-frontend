@@ -166,13 +166,13 @@ const onSubmit = () => {
                             </el-typography>
                         </span>
                     </template>
-                    <el-menu-item index="4-1">
+                    <el-menu-item index="4-1" :route="{ name: 'staff_add' }">
                         <el-icon>
                             <CirclePlusFilled />
                         </el-icon>
-                        <span>Add Notification</span> <!-- 新增通知 -->
+                        <span>Add Employees</span> <!-- 新增员工 -->
                     </el-menu-item>
-                    <el-menu-item index="4-2">
+                    <el-menu-item index="4-2" :route="{ name: 'staff_list' }">
                         <el-icon>
                             <List />
                         </el-icon>

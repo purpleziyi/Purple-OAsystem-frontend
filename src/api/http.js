@@ -35,8 +35,13 @@ class Http {
                 resolve(result.data);
             } catch (err) {
                 // 走到catch中，就说明状态码肯定不是200
-                let detail = err.response.data.detail;
-                reject(detail)
+                try {
+                    let detail = err.response.data.detail;
+                    reject(detail)
+                } catch {
+                    reject('server error!')
+                }
+
             }
         })
     }
