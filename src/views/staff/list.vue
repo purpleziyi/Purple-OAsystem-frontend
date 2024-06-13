@@ -15,7 +15,7 @@ let pagination = reactive({
     page: 1,
     total: 0
 })
-let page_size = ref(1)
+let page_size = ref(10)  //默认情况下显示10条
 let dialogVisible = ref(false)
 let staffForm = reactive({
     status: 1
@@ -133,7 +133,7 @@ const onUploadFail = (error) => {
 </script>
 
 <template>
-    <OADialog title="修改员工状态" v-model="dialogVisible" @submit="onSubmitEditStaff">
+    <OADialog title="Modify employee status" v-model="dialogVisible" @submit="onSubmitEditStaff"><!-- 修改员工状态 -->
         <el-form :model="staffForm" label-width="100px">
             <el-form-item label="state"><!-- 状态 -->
                 <el-radio-group v-model="staffForm.status" class="ml-4">
@@ -192,8 +192,8 @@ const onUploadFail = (error) => {
                 <el-table-column prop="department.name" label="Department"></el-table-column><!-- 部门 -->
                 <el-table-column label="State"><!-- 状态 -->
                     <template #default="scope">
-                        <el-tag v-if="scope.row.status == 1" type="success">Normal</el-tag><!-- 正常 -->
-                        <el-tag v-else-if="scope.row.status == 2" type="warning">Inactivated</el-tag><!-- 未激活 -->
+                        <el-tag v-if="scope.row.status == 1" type="success">Active</el-tag><!-- 正常(激活) -->
+                        <el-tag v-else-if="scope.row.status == 2" type="warning">Inactive</el-tag><!-- 未激活 -->
                         <el-tag v-else type="danger">Locked</el-tag><!-- 已锁定 -->
                     </template>
                 </el-table-column>
@@ -204,7 +204,7 @@ const onUploadFail = (error) => {
                 </el-table-column>
             </el-table>
 
-            <template #footer>
+            <template #footer> <!-- 分页 -->
                 <div style="display: flex; justify-content: space-between;">
                     <el-form-item label="Page："> <!-- 每页 -->
                         <el-select v-model="page_size" size="small" style="width: 100px;">

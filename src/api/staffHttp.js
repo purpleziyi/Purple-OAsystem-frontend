@@ -10,7 +10,13 @@ const addStaff = (username, email, password) => {
     return http.post(path, { username, email, password })
 }
 
+const getStaffList = (page = 1, size = 10) => {
+    const path = `/staff/staff?page=${page}&size=${size}`
+    return http.get(path)
+}
+
 export default {
     getAllDepartment,
-    addStaff
+    addStaff,
+    getStaffList
 }
