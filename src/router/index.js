@@ -9,7 +9,7 @@ import inform_list from "@/views/inform/list.vue"
 import { useAuthStore } from '@/stores/auth'
 import staffadd from "@/views/staff/add.vue"
 import stafflist from "@/views/staff/list.vue"
-// import home from "@/views/home/home.vue"
+import home from "@/views/home/home.vue"
 
 
 
@@ -21,6 +21,7 @@ const router = createRouter({
       name: 'frame',
       component: frame,
       children: [
+        { path: '/', name: 'home', component: home },
         { path: '/absent/my', name: 'myabsent', component: myabsent },
         { path: '/absent/sub', name: 'subabsent', component: subabsent },
         { path: '/inform/publish', name: 'inform_publish', component: publish },

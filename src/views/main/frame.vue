@@ -97,7 +97,7 @@ const onSubmit = () => {
             </router-link>
             <el-menu :router="true" active-text-color="#ffd04b" background-color="#AE6CC2" class="el-menu-vertical-demo"
                 default-active="1" text-color="#fff" :collapse="isCollapse" :collapse-transition="false">
-                <el-menu-item index="1">
+                <el-menu-item index="1" :router="{ name: 'home' }">
                     <el-icon>
                         <HomeFilled />
                     </el-icon>

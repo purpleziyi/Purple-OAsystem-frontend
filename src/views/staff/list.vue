@@ -127,7 +127,7 @@ const onUploadSuccess = () => {
 }
 
 const onUploadFail = (error) => {
-    const detail = JSON.parse(error.message).detail
+    const detail = JSON.parse(error.message).detail  // 将Json字符串转化为detail
     ElMessage.error(detail)
 }
 
