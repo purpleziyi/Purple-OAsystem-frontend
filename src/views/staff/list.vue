@@ -15,14 +15,14 @@ let pagination = reactive({
     page: 1,
     total: 0
 })
-let page_size = ref(10)  //默认情况下显示10条
-let dialogVisible = ref(false)
-let staffForm = reactive({
+let page_size = ref(1)  //默认情况下显示1条
+let dialogVisible = ref(false)  //默认情况下不显示“修改员工状态”的对话框
+let staffForm = reactive({  // 员工状态的表单默认时是1，即active
     status: 1
 })
-let handleIndex = 0
+let handleIndex = 0  // onEditStaff
 let departments = ref([])
-let filterForm = reactive({
+let filterForm = reactive({ //为员工列表过滤内容 初始值
     department_id: null,
     username: "",
     date_joined: []
@@ -54,6 +54,7 @@ onMounted(async () => {
     }
 })
 
+// watch用于监听，通过value参数监听到最新的page  
 watch(() => pagination.page, async function (value) {
     fetchStaffList(value, page_size.value)
 })
@@ -62,7 +63,7 @@ watch(page_size, function (value) {
     if (pagination.page == 1) {
         fetchStaffList(1, value)
     } else {
-        pagination.page = 1
+        pagination.page = 1  // 当pagination.page≠1时，令其为1，这样上一个watch函数就会监听到pagination.page为1了
     }
 })
 
@@ -77,9 +78,9 @@ const onSubmitEditStaff = async () => {
     let staff = staffs.value[handleIndex]
     try {
         let newstaff = await staffHttp.updateStaffStatus(staff.uid, staffForm.status)
-        ElMessage.success("员工状态修改成功！")
-        dialogVisible.value = false;
-        staffs.value.splice(handleIndex, 1, newstaff)
+        ElMessage.success("Employee status modified successfully!")
+        dialogVisible.value = false;  // 隐藏对话框
+        staffs.value.splice(handleIndex, 1, newstaff)  // 修改这个员工的值
     } catch (detail) {
         ElMessage.error(detail)
     }
@@ -92,7 +93,7 @@ const onSearch = () => {
 const onDownload = async () => {
     let rows = tableRef.value.getSelectionRows()
     if (!rows || rows.length == 0) {
-        ElMessage.info('请先选中要导出的员工！')
+        ElMessage.info('Please select the employees to be exported first!')  // 请先选中要导出的员工！
         return;
     }
     try {
@@ -104,7 +105,7 @@ const onDownload = async () => {
         const a = document.createElement("a")
         a.href = href
         // 设置a标签的download属性，在点击的时候，就会执行下载操作
-        a.setAttribute('download', '员工信息.xlsx')
+        a.setAttribute('download', 'Employee Information.xlsx')
         // 将a标签添加到网页结构中
         document.body.appendChild(a)
         // 模拟点击行为，只要点击了，那么浏览器就会启动下载操作（下载href属性指定的数据）
@@ -133,20 +134,20 @@ const onUploadFail = (error) => {
 </script>
 
 <template>
-    <OADialog title="Modify employee status" v-model="dialogVisible" @submit="onSubmitEditStaff"><!-- 修改员工状态 -->
+    <OADialog title="Modify employee status" v-model="dialogVisible" @submit="onSubmitEditStaff"><!-- 修改员工状态 对话框-->
         <el-form :model="staffForm" label-width="100px">
             <el-form-item label="state"><!-- 状态 -->
                 <el-radio-group v-model="staffForm.status" class="ml-4">
-                    <el-radio :value="1">Activate</el-radio><!-- 激活 -->
-                    <el-radio :value="3">Lock</el-radio><!-- 锁定 -->
+                    <el-radio :value="1">Active</el-radio><!-- 激活 -->
+                    <el-radio :value="3">Locked</el-radio><!-- 锁定 -->
                 </el-radio-group>
             </el-form-item>
         </el-form>
     </OADialog>
     <OAMain title="Employee List"><!-- 员工列表 -->
         <el-card>
-            <el-form :inline="true" class="my-form-inline">
-                <el-form-item label="By Department"><!-- 按部门 -->
+            <el-form :inline="true" class="my-form-inline"><!-- inline使得内容排列为一行 "my-form-inline"格式见style-->
+                <el-form-item label="By Department"><!-- 按部门  下拉框-->
                     <el-select v-model="filterForm.department_id">
                         <el-option v-for="department in departments" :label="department.name" :value="department.id"
                             :key="department.name" />
@@ -161,23 +162,23 @@ const onUploadFail = (error) => {
                         value-format="YYYY-MM-DD" />
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" icon="Search" @click="onSearch"></el-button>
+                    <el-button type="primary" icon="Search" @click="onSearch"></el-button><!-- 搜索图标 -->
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="danger" icon="Download" @click="onDownload">Download</el-button><!-- 下载 -->
+                    <el-button type="danger" icon="Download" @click="onDownload">Download</el-button><!-- 下载 按钮-->
                 </el-form-item>
 
                 <el-form-item>
                     <el-upload :action="BASE_URL + '/staff/upload'"
                         :headers="{ Authorization: 'JWT ' + authStore.token }" :on-success="onUploadSuccess"
                         :on-error="onUploadFail" :show-file-list="false" :auto-upload="true" accept=".xlsx, .xls">
-                        <el-button type="danger" icon="Upload">Upload</el-button><!-- 上传 -->
+                        <el-button type="danger" icon="Upload">Upload</el-button><!-- 上传 按钮-->
                     </el-upload>
                 </el-form-item>
             </el-form>
         </el-card>
         <el-card>
-            <el-table :data="staffs" ref="tableRef">
+            <el-table :data="staffs" ref="tableRef"><!-- 通过ref获取table对象 -->
                 <el-table-column type="selection" width="55"></el-table-column>
                 <el-table-column label="NO." width="60"><!-- 序号 -->
                     <template #default="scope">{{ scope.$index + 1 }}</template>

@@ -49,7 +49,7 @@ class Http {
     get(path, params) {
         return new Promise(async (resolve, reject) => {
             try {
-                let result = await this.instance.get(path, params)
+                let result = await this.instance.get(path, { params })
                 resolve(result.data)
             } catch (err) {
                 let detail = err.response.data.detail;
@@ -76,6 +76,21 @@ class Http {
                 let result = await this.instance.delete(path)
                 // 因为服务端的delete方法，只是返回一个状态码，并没有数据，所以直接把result返回回去就可以了
                 resolve(result);
+            } catch (err) {
+                let detail = err.response.data.detail;
+                reject(detail)
+            }
+        })
+    }
+
+    downloadFile(path, params) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let result = await this.instance.get(path, {
+                    params,
+                    responseType: "blob"
+                })
+                resolve(result)
             } catch (err) {
                 let detail = err.response.data.detail;
                 reject(detail)
