@@ -15,7 +15,7 @@ let pagination = reactive({
     page: 1,
     total: 0
 })
-let page_size = ref(1)  //默认情况下显示1条
+let page_size = ref(3)  //默认情况下显示1条
 let dialogVisible = ref(false)  //默认情况下不显示“修改员工状态”的对话框
 let staffForm = reactive({  // 员工状态的表单默认时是1，即active
     status: 1
@@ -209,8 +209,8 @@ const onUploadFail = (error) => {
                 <div style="display: flex; justify-content: space-between;">
                     <el-form-item label="Page："> <!-- 每页 -->
                         <el-select v-model="page_size" size="small" style="width: 100px;">
-                            <el-option select label="10 items/page" :value="1" />
-                            <el-option label="20 items/page" :value="2" />
+                            <el-option select label="10 items" :value="1" />
+                            <el-option label="20 items" :value="2" />
                         </el-select>
                     </el-form-item>
                     <el-pagination background layout="prev, pager, next" :total="pagination.total"

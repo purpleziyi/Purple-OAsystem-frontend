@@ -4,6 +4,13 @@ import { defineStore } from 'pinia'
 const USER_KEY = "OA_USER_KEY"
 const TOKEN_KEY = "OA_TOKEN_KEY"
 
+export const PermissionChoices = {
+    All: 0b111,  // 所有权限    
+    Staff: 0b000, // 普通员工权限    
+    Boarder: 0b001, // 需要董事会权限    
+    Leader: 0b010,// TeamLeader权限
+}
+
 export const useAuthStore = defineStore('auth', () => {
     let _user = ref({})
     let _token = ref("")
@@ -58,6 +65,47 @@ export const useAuthStore = defineStore('auth', () => {
         return false;
     })
 
+    let own_permissions = computed(() => {
+        // 0b000
+        let _permissions = PermissionChoices.Staff
+        if (is_logined.value) {
+            // 判断是否是董事会成员
+            if (user.value.department.name == 'Board') {
+                // 0b000 | 0b001 = 0b001
+                _permissions |= PermissionChoices.Boarder
+            }
+
+            // 判断是否是team leader
+            if (user.value.department.leader_id == user.value.uid) {
+                _permissions |= PermissionChoices.Leader
+            }
+        }
+        return _permissions
+    })
+
+    function has_permission(permissions, opt = '|') {
+        // opt可选值：
+        // 1. |：或运算
+        // 2. &：且运算
+        // own_permissions: 0b001
+        // permissions: [0b010, 0b001]
+        let results = permissions.map((permission) => (permission & own_permissions.value) == permission)
+        // results = [true, false, false, true]
+        if (opt == "|") {
+            if (results.indexOf(true) >= 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            if (results.indexOf(false) >= 0) {
+                return false;
+            } else {
+                return true
+            }
+        }
+    }
+
     // 想要让外面访问到的，就必须要返回
-    return { setUserToken, user, token, is_logined, clearUserToken }
+    return { setUserToken, user, token, is_logined, clearUserToken, has_permission }
 })

@@ -1,18 +1,24 @@
 <script setup name="frame">
-import { computed, ref, reactive } from "vue"
+import { ref, computed, reactive, onMounted } from "vue"
 import {
     Expand,
     Fold
 } from '@element-plus/icons-vue'
-import { useAuthStore } from "@/stores/auth";    // user-info is stored in auth.js
+import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import authHttp from "@/api/authHttp";
 import { ElMessage } from "element-plus";
+import routes from "@/router/frame"
+
 
 const authStore = useAuthStore()
 const router = useRouter()
 
-
+let displayUser = reactive({
+    department: {},
+    realname: ""
+})
+let defaultActive = ref("home")
 let isCollapse = ref(false)
 let dialogVisible = ref(false)
 
@@ -47,6 +53,12 @@ let asideWidth = computed(() => {
     } else {
         return "250px"
     }
+})
+
+onMounted(() => {
+    defaultActive.value = router.currentRoute.value.name
+    displayUser.department = authStore.user.department
+    displayUser.realname = authStore.user.realname
 })
 
 const onCollapseAside = () => {
@@ -95,109 +107,64 @@ const onSubmit = () => {
                     Purple <span v-show="!isCollapse">OA System</span>
                 </el-typography>
             </router-link>
+
             <el-menu :router="true" active-text-color="#ffd04b" background-color="#AE6CC2" class="el-menu-vertical-demo"
-                default-active="1" text-color="#fff" :collapse="isCollapse" :collapse-transition="false">
-                <el-menu-item index="1" :router="{ name: 'home' }">
-                    <el-icon>
-                        <HomeFilled />
-                    </el-icon>
-                    <span>
-                        <el-typography :style="{ fontFamily: 'Arial', fontSize: '15px' }">
-                            Home <!-- 主页 -->
-                        </el-typography>
-                    </span>
-                </el-menu-item>
-                <el-sub-menu index="2">
-                    <template #title>
-                        <el-icon>
-                            <Checked />
-                        </el-icon>
-                        <span>
-                            <el-typography :style="{ fontFamily: 'Arial', fontSize: '15px' }">
-                                Attendance <!-- 考勤管理 -->
-                            </el-typography>
-                        </span>
+                :default-active="defaultActive" text-color="#fff" :collapse="isCollapse" :collapse-transition="false">
+
+                <template v-for="route in routes[0].children"><!--循环整个路由-->
+                    <template v-if="authStore.has_permission(route.meta.permissions, route.meta.opt)">
+
+                        <el-menu-item v-if="!route.children" :index="route.name" :route="{ name: route.name }">
+                            <!--一级路由-->
+                            <el-icon>
+                                <component :is="route.meta.icon"></component>
+                            </el-icon>
+                            <span>{{ route.meta.text }}</span>
+                        </el-menu-item>
+
+                        <el-sub-menu v-else :index="route.name"> <!--二级子路由-->
+                            <template #title>
+                                <el-icon>
+                                    <component :is="route.meta.icon"></component>
+                                </el-icon>
+                                <span>{{ route.meta.text }}</span>
+                            </template>
+
+                            <template v-for="child in route.children">
+                                <template v-if="authStore.has_permission(child.meta.permissions, child.meta.opt)">
+                                    <el-menu-item v-if="!child.meta.hidden" :index="child.name"
+                                        :route="{ name: child.name }">
+                                        <el-icon>
+                                            <component :is="child.meta.icon"></component>
+                                        </el-icon>
+                                        <span>{{ child.meta.text }}</span>
+                                    </el-menu-item>
+                                </template>
+                            </template>
+
+                        </el-sub-menu>
                     </template>
-                    <el-menu-item index="2-1" :route="{ name: 'myabsent' }">
-                        <el-icon>
-                            <UserFilled />
-                        </el-icon>
-                        <span>Personal attendance</span> <!-- 个人考勤 -->
-                    </el-menu-item>
-                    <el-menu-item index="2-2" :route="{ name: 'subabsent' }">
-                        <el-icon>
-                            <User />
-                        </el-icon>
-                        <span>Subordinate attendance</span> <!-- 下属考勤 ？？-->
-                    </el-menu-item>
-                </el-sub-menu>
-                <el-sub-menu index="3">
-                    <template #title>
-                        <el-icon>
-                            <BellFilled />
-                        </el-icon>
-                        <span>
-                            <el-typography :style="{ fontFamily: 'Arial', fontSize: '15px' }">
-                                Notification <!-- 通知管理 -->
-                            </el-typography>
-                        </span>
-                    </template>
-                    <el-menu-item index="3-1" :route="{ name: 'inform_publish' }"> <!-- 发布通知 -->
-                        <el-icon>
-                            <CirclePlusFilled />
-                        </el-icon>
-                        <span>Post a Notice</span> <!-- 发布通知 -->
-                    </el-menu-item>
-                    <el-menu-item index="3-2" :route="{ name: 'inform_list' }"><!-- 通知列表 -->
-                        <el-icon>
-                            <List />
-                        </el-icon>
-                        <span>Notification List</span> <!-- 通知列表 -->
-                    </el-menu-item>
-                </el-sub-menu>
-                <el-sub-menu index="4">
-                    <template #title>
-                        <el-icon>
-                            <Avatar />
-                        </el-icon>
-                        <span>
-                            <el-typography :style="{ fontFamily: 'Arial', fontSize: '15px' }">
-                                Employee <!-- 员工管理 -->
-                            </el-typography>
-                        </span>
-                    </template>
-                    <el-menu-item index="4-1" :route="{ name: 'staff_add' }">
-                        <el-icon>
-                            <CirclePlusFilled />
-                        </el-icon>
-                        <span>Add Employees</span> <!-- 新增员工 -->
-                    </el-menu-item>
-                    <el-menu-item index="4-2" :route="{ name: 'staff_list' }">
-                        <el-icon>
-                            <List />
-                        </el-icon>
-                        <span>Employee List</span> <!-- 员工列表 -->
-                    </el-menu-item>
-                </el-sub-menu>
+                </template>
             </el-menu>
         </el-aside>
-
         <el-container>
             <el-header class="header">
-                <div class="left-header"> <!-- 以下两个button都放在左边 -->
+                <div class="left-header">
                     <el-button v-show="isCollapse" :icon="Expand" @click="onCollapseAside" />
                     <el-button v-show="!isCollapse" :icon="Fold" @click="onCollapseAside" />
                 </div>
                 <el-dropdown>
                     <span class="el-dropdown-link">
                         <el-avatar :size="30" icon="UserFilled" />
-                        <span style="margin-left: 10px;">
-                            <el-typography :style="{ fontFamily: 'Arial', fontSize: '15px' }">
-                                [{{ authStore.user.department.name }}]{{ authStore.user.username }} <!-- 用户名展示区 -->
-                            </el-typography>
-                        </span>
-                        <el-icon class="el-icon--right"><arrow-down /></el-icon>
+                        <span style="margin-left: 10px;">[{{ displayUser.department.name }}]{{
+                            displayUser.realname
+                        }}</span>
+                        <el-icon class="el-icon--right">
+                            <arrow-down />
+                        </el-icon>
                     </span>
+
+
                     <template #dropdown>
                         <el-dropdown-menu>
                             <el-dropdown-item @click="onControlResetPwdDialog">Change Password</el-dropdown-item>
@@ -209,7 +176,7 @@ const onSubmit = () => {
             </el-header>
             <el-main class="main">
                 <RouterView>
-                </RouterView>
+                </RouterView><!--路由出口-->
             </el-main>
         </el-container>
     </el-container>
